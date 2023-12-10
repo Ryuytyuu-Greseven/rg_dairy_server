@@ -6,6 +6,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { config } from 'dotenv';
 import { UsersModule } from './users/users.module';
 import { LoggerMiddleware } from './middlewares/logger/logger.middleware';
+import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
 
 config();
 @Module({
@@ -13,9 +15,10 @@ config();
     MongooseModule.forRoot(`${process.env.DISC_URL}`),
     ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

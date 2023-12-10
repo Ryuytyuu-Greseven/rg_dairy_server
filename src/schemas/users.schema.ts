@@ -14,8 +14,13 @@ export class User {
   @Prop({ required: true })
   email: string;
 
+  @Prop({ required: false })
+  personalNumber: string;
+
   @Prop({ required: true })
-  personalNumber: number;
+  profilename: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+UserSchema.index({ email: 1 }, { unique: true });
+UserSchema.index({ username: 1 }, { unique: true });
