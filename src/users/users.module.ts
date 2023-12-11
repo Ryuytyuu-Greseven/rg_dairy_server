@@ -6,11 +6,15 @@ import { User, UserSchema } from 'src/schemas/users.schema';
 import { JwtModule } from '@nestjs/jwt';
 import { GlobalExceptionFilter } from 'src/Exceptions/global-exception.filters';
 import { config } from 'dotenv';
+import { Book, BookSchema } from 'src/schemas/books.schema';
 
 config();
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Book.name, schema: BookSchema },
+    ]),
     JwtModule.register({
       global: true,
       secret: process.env.SECRET_KEY,

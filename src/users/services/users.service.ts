@@ -9,6 +9,9 @@ import { LoginDto } from 'src/dtos/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ERROR_MESSAGES } from 'src/constants/contants';
 import { SignupDto } from 'src/dtos/signup.dto';
+import { Book } from 'src/schemas/books.schema';
+import { BookCreationDto } from 'src/dtos/book-creation.dto';
+import { Request } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +20,7 @@ export class UsersService {
 
   constructor(
     @InjectModel(User.name) private UserModel: Model<User>,
+    @InjectModel(Book.name) private BookModel: Model<Book>,
     private jwtService: JwtService,
   ) {}
 
@@ -145,5 +149,62 @@ export class UsersService {
 
   async encPass(password: string) {
     return await hash(password, this.salt);
+  }
+
+  // ========================  BOOK  =============================  //
+
+  async addNewBook(body: BookCreationDto, request: Request) {
+    const result = {
+      success: true,
+      message: '',
+      data: {},
+    };
+
+    try {
+      const userDetails = request['user'];
+      console.log(userDetails, result);
+
+      const response = await this.BookModel.insertMany([
+        {
+          title: body.title,
+          year: body.year,
+          genre: '',
+          author: userDetails.username,
+        },
+      ]);
+      log('Dairy Insertion', response);
+      result.message = ERROR_MESSAGES.dairy_created;
+    } catch (error) {
+      log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.dairy_creation_error;
+    }
+    return result;
+  }
+
+  async getBooks(body: any, request: Request) {
+    const result = {
+      success: true,
+      message: '',
+      data: {},
+    };
+
+    try {
+      const userDetails = request['user'];
+      console.log(userDetails, result);
+
+      const response = await this.BookModel.find({
+        author: userDetails.username,
+      });
+
+      log('My Dairies', response);
+      result.data = response;
+      result.message = ERROR_MESSAGES.fetch_success;
+    } catch (error) {
+      log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.dairy_fetch_failure;
+    }
+    return result;
   }
 }
