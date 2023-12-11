@@ -170,6 +170,7 @@ export class UsersService {
           year: body.year,
           genre: '',
           author: userDetails.username,
+          titleConfig: { font: body.font ? body.font : 'cursive' },
         },
       ]);
       log('Dairy Insertion', response);

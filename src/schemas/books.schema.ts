@@ -17,6 +17,9 @@ export class Book {
 
   @Prop()
   genre: string;
+
+  @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
+  titleConfig: object;
 }
 
 export const BookSchema = SchemaFactory.createForClass(Book);
