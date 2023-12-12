@@ -170,7 +170,11 @@ export class UsersService {
           year: body.year,
           genre: '',
           author: userDetails.username,
-          titleConfig: { font: body.font ? body.font : 'cursive' },
+          titleConfig: {
+            font: body.font,
+            color: body.titleColor,
+          },
+          bookConfig: { color: body.bookColor },
         },
       ]);
       log('Dairy Insertion', response);

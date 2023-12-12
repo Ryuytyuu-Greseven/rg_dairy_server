@@ -24,4 +24,16 @@ export class BookCreationDto {
   @MinLength(2)
   @MaxLength(50)
   font: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(7)
+  @MaxLength(7)
+  bookColor: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(7)
+  @MaxLength(7)
+  titleColor: string;
 }

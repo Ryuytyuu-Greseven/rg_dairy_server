@@ -20,6 +20,9 @@ export class Book {
 
   @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
   titleConfig: object;
+
+  @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
+  bookConfig: object;
 }
 
 export const BookSchema = SchemaFactory.createForClass(Book);
