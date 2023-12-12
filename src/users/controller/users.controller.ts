@@ -6,6 +6,7 @@ import { LoginDto } from 'src/dtos/login.dto';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { BookCreationDto } from 'src/dtos/book-creation.dto';
+import { DairyDetailsDto } from 'src/dtos/dairy-details.dto';
 
 @Controller('users')
 export class UsersController {
@@ -37,5 +38,11 @@ export class UsersController {
   @Post('self-dairies')
   fetchBooks(@Body() body: any, @Req() request: Request) {
     return this.userService.getBooks(body, request);
+  }
+
+  @UseGuards(AuthGuard)
+  @Post('dairy-details')
+  dairyDetails(@Body() body: DairyDetailsDto, @Req() request: Request) {
+    return this.userService.getDairyDetails(body, request);
   }
 }

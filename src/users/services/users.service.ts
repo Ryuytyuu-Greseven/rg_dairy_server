@@ -12,6 +12,7 @@ import { SignupDto } from 'src/dtos/signup.dto';
 import { Book } from 'src/schemas/books.schema';
 import { BookCreationDto } from 'src/dtos/book-creation.dto';
 import { Request } from 'express';
+import { DairyDetailsDto } from 'src/dtos/dairy-details.dto';
 
 @Injectable()
 export class UsersService {
@@ -203,6 +204,33 @@ export class UsersService {
       });
 
       log('My Dairies', response);
+      result.data = response;
+      result.message = ERROR_MESSAGES.fetch_success;
+    } catch (error) {
+      log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.dairy_fetch_failure;
+    }
+    return result;
+  }
+
+  async getDairyDetails(body: DairyDetailsDto, request: Request) {
+    const result = {
+      success: true,
+      message: '',
+      data: {},
+    };
+
+    try {
+      const userDetails = request['user'];
+      console.log(userDetails, result);
+
+      const response = await this.BookModel.findOne({
+        author: userDetails.username,
+        _id: body.dairyId,
+      });
+
+      log('Fetched dairy', response);
       result.data = response;
       result.message = ERROR_MESSAGES.fetch_success;
     } catch (error) {
