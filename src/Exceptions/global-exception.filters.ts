@@ -17,7 +17,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     log('Exception', exception);
     response.status(200).json({
-      statusCode: 200,
+      statusCode: status === 401 ? status : 200,
       success: false,
       timestamp: new Date().toISOString(),
       path: request.url,
