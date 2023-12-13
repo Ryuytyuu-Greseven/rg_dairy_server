@@ -23,6 +23,21 @@ export class Book {
 
   @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
   bookConfig: object;
+
+  @Prop({ required: true, type: Array<Page> })
+  pages: Page[];
+}
+
+@Schema({ timestamps: true })
+class Page {
+  @Prop({ required: true })
+  pageNo: number;
+
+  @Prop({ required: true })
+  text: string;
+
+  @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
+  config: object;
 }
 
 export const BookSchema = SchemaFactory.createForClass(Book);

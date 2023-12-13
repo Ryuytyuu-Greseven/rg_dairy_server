@@ -13,6 +13,7 @@ import { Book } from 'src/schemas/books.schema';
 import { BookCreationDto } from 'src/dtos/book-creation.dto';
 import { Request } from 'express';
 import { DairyDetailsDto } from 'src/dtos/dairy-details.dto';
+import { NewPageDto } from 'src/dtos/new-page.dto';
 
 @Injectable()
 export class UsersService {
@@ -176,6 +177,7 @@ export class UsersService {
             color: body.titleColor,
           },
           bookConfig: { color: body.bookColor },
+          pages: [],
         },
       ]);
       log('Dairy Insertion', response);
@@ -237,6 +239,61 @@ export class UsersService {
       log(error);
       result.success = false;
       result.message = ERROR_MESSAGES.dairy_fetch_failure;
+    }
+    return result;
+  }
+
+  // save a new page into dairy
+  async savePage(body: NewPageDto, request: Request) {
+    const result = {
+      success: true,
+      data: {},
+      message: '',
+    };
+
+    try {
+      const userDetails = request['user'];
+      const newPage = { pageNo: body.pageNo, text: body.text, config: {} };
+      const page = await this.BookModel.updateOne(
+        { _id: body.bookId, author: userDetails.username },
+        { $push: { pages: newPage } },
+      );
+      console.log('Added a new page', page);
+
+      result.data = JSON.parse(JSON.stringify(page));
+      result.message = ERROR_MESSAGES.page_saved;
+    } catch (error) {
+      console.log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.page_save_failure;
+    }
+    return result;
+  }
+
+  // fetching the pages from dairy
+  async getPages(body: DairyDetailsDto, request: Request) {
+    const result = {
+      success: true,
+      data: {},
+      message: '',
+    };
+
+    try {
+      const userDetails = request['user'];
+
+      const { pages } = await this.BookModel.findOne(
+        {
+          _id: body.dairyId,
+          author: userDetails.username,
+        },
+        { pages: 1 },
+      );
+      result.data = pages;
+      result.message = ERROR_MESSAGES.page_saved;
+    } catch (error) {
+      console.log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.page_save_failure;
     }
     return result;
   }

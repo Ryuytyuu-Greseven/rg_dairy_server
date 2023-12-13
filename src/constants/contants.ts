@@ -12,5 +12,8 @@ export const ERROR_MESSAGES = {
 
   dairy_created: 'Dairy Creation Done.',
   dairy_creation_error: 'Ynable To Create Dairy.',
-  dairy_fetch_failure: `Unable to Fetch Dairies.`,
+  dairy_fetch_failure: `Unable To Fetch Dairies.`,
+
+  page_saved: 'Page Saved Successfully.',
+  page_save_failure: 'Unable TO Save The Page.',
 };
