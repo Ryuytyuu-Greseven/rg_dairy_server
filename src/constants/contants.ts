@@ -16,4 +16,7 @@ export const ERROR_MESSAGES = {
 
   page_saved: 'Page Saved Successfully.',
   page_save_failure: 'Unable TO Save The Page.',
+
+  temp_user_success: 'Please Verify The OTP.',
+  otp_resend_success: 'Otp Resent Successfully.',
 };

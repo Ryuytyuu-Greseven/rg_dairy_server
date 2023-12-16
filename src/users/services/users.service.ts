@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
+
+import * as nodeMailer from 'nodemailer';
 import { compare, hash } from 'bcrypt';
 import { Model } from 'mongoose';
 import { log } from 'console';
@@ -14,6 +17,10 @@ import { BookCreationDto } from 'src/dtos/book-creation.dto';
 import { Request } from 'express';
 import { DairyDetailsDto } from 'src/dtos/dairy-details.dto';
 import { NewPageDto } from 'src/dtos/new-page.dto';
+import { randomBytes } from 'crypto';
+import { TempUser } from 'src/schemas/temp-user.schema';
+import { VerifyDto } from 'src/dtos/verify-user.dto';
+import { ResendOtpDto } from 'src/dtos/resend-otp.dto';
 
 @Injectable()
 export class UsersService {
@@ -21,9 +28,11 @@ export class UsersService {
   salt = 11.4;
 
   constructor(
+    @InjectModel(TempUser.name) private TempUserModel: Model<TempUser>,
     @InjectModel(User.name) private UserModel: Model<User>,
     @InjectModel(Book.name) private BookModel: Model<Book>,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async fetchDetails(username: string, email: string) {
@@ -42,6 +51,12 @@ export class UsersService {
     }
 
     return result;
+  }
+  async fetchTempUserDetails(userId: string) {
+    const [userDetails] = await this.TempUserModel.find({ _id: userId });
+    console.log(userDetails);
+
+    return userDetails;
   }
 
   async jwtLogin(payload: any) {
@@ -96,7 +111,7 @@ export class UsersService {
   }
 
   async signUpUser(body: SignupDto) {
-    const result = { data: {}, success: true, message: '' };
+    const result = { data: {}, success: true, message: '', userId: '' };
     try {
       // const decodedBody: any = await this.cryptService.decrypt(request);
       console.log(body);
@@ -110,22 +125,63 @@ export class UsersService {
         console.log('check', body);
 
         const enc_password = await this.encPass(body.password);
-        const login = new this.UserModel({
+        const otp = this.randomStringGenerator(2);
+
+        await this.sendMailToUser(body.email, otp);
+
+        const login = new this.TempUserModel({
           email: body.email,
           password: enc_password,
           personalNumber: '',
           profilename: body.profilename,
           username: body.username,
+          otp: otp,
         });
 
         const response = await login.save();
         console.log(response);
+        result.userId = `${response._id}`;
 
         // result.data = await this.jwtLogin({
         //   email: response.email,
         //   username: response.username,
         //   profilename: response.profilename,
         // });
+        result.message = ERROR_MESSAGES.temp_user_success;
+      } else {
+        result.success = false;
+        result.message = ERROR_MESSAGES.account_exists;
+      }
+    } catch (error) {
+      console.log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.internal_error;
+    }
+    // const output = await this.cryptService.encrypt(request, result);
+    return result;
+  }
+
+  // final step of signup process for the user verification
+  async verifyUser(body: VerifyDto) {
+    const result = { data: {}, success: true, message: '', userId: '' };
+    try {
+      console.log(body);
+
+      const tempUserDetails = await this.fetchTempUserDetails(body.userId);
+
+      if (tempUserDetails.email) {
+        console.log('check', body);
+
+        const login = new this.UserModel({
+          email: tempUserDetails.email,
+          password: tempUserDetails.password,
+          personalNumber: tempUserDetails.personalNumber,
+          profilename: tempUserDetails.profilename,
+          username: tempUserDetails.username,
+        });
+
+        const response = await login.save();
+        console.log(response);
 
         result.message = ERROR_MESSAGES.account_created;
       } else {
@@ -138,6 +194,37 @@ export class UsersService {
       result.message = ERROR_MESSAGES.internal_error;
     }
     // const output = await this.cryptService.encrypt(request, result);
+    return result;
+  }
+
+  // resend otp to USER
+  async regenerateOtp(body: ResendOtpDto) {
+    const result = { success: false, message: '', data: {} };
+
+    try {
+      console.log(body);
+
+      const tempUserDetails = await this.fetchTempUserDetails(body.userId);
+
+      if (tempUserDetails.email) {
+        const otp = this.randomStringGenerator(2);
+        await this.sendMailToUser(tempUserDetails.email, otp);
+        await this.TempUserModel.updateOne(
+          { _id: tempUserDetails._id },
+          { otp },
+        );
+
+        result.message = ERROR_MESSAGES.otp_resend_success;
+      } else {
+        result.success = false;
+        result.message = ERROR_MESSAGES.internal_error;
+      }
+    } catch (error) {
+      console.log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.internal_error;
+    }
+
     return result;
   }
 
@@ -296,5 +383,126 @@ export class UsersService {
       result.message = ERROR_MESSAGES.page_save_failure;
     }
     return result;
+  }
+
+  // async..await is not allowed in global scope, must use a wrapper
+  async sendMailToUser(user_email: string, otp: string) {
+    try {
+      console.log(user_email, otp);
+      let transporter: any = {};
+
+      // create reusable transporter object using the default SMTP transport
+      transporter = nodeMailer.createTransport({
+        // name: 'mail.ryuytyuuspace.in',
+        host: 'smpt.gmail.com',
+        port: 465,
+        secure: true, // true for 465, false for other ports
+        service: 'gmail',
+        auth: {
+          user: this.configService.get('EMAIL'), // generated ethereal user
+          pass: this.configService.get('EMAIL_KEY'), // generated ethereal password
+        },
+        // tls: {
+        //   rejectUnauthorized: false,
+        // },
+      });
+      console.log('Its Done');
+
+      // send mail with defined transport object
+      const info = await transporter.sendMail({
+        from: `"Dairy 🐿️" <${this.configService.get('EMAIL')}>`, // sender address
+        to: `${user_email}`, // "bar@example.com, baz@example.com" list of receivers
+        subject: 'OTP Verification from Dairy', // Subject line
+        text: `OTP Verification from Dairy`, // plain text body
+        html: this.getEmailOtp(otp), // html body
+      });
+      console.log('Message sent: %s', info.messageId);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+
+  // otp generation
+  randomStringGenerator(count: number) {
+    return randomBytes(count).toString('hex');
+  }
+
+  // get the message box of otp
+  getEmailOtp(otp: string) {
+    return `
+    <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <title>Dairy Email Verification OTP</title>
+            <style>
+              /* Reset default styles */
+              body, h1, p {
+                margin: 0;
+                padding: 0;
+              }
+          
+              /* Basic styling for the email content */
+              body {
+                font-family: Arial, sans-serif;
+                background-color: #1f2222;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+              }
+          
+              .container {
+                max-width: 400px;
+                padding: 40px;
+                background-color: #000000;
+                border-radius: 5px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+                text-align: center;
+              }
+
+              .login-border {
+                border-radius: 25px;
+              }
+          
+              .signup-head {
+                color: wheat;
+                margin: 0px 10px 20px 25px;
+              }
+              
+              .singup-label {
+                color: whitesmoke;
+                display: block;
+                margin-left: 2px;
+              }
+              
+              .otp-code {
+                font-size: 32px;
+                font-weight: bold;
+                color: #009688;
+                margin: 20px 0;
+              }
+
+              .website-info {
+                margin-top: 15px;
+                font-size: 14px;
+                color: #999;
+              }
+            </style>
+        </head>
+        <body>
+          <div class="container login-border">
+            <h1 class="signup-head">Email Verification OTP</h1>
+            <p class="singup-label">Your OTP (One-Time Password) for email verification is:</p>
+            <p class="otp-code">${otp}</p>
+            <p class="singup-label">Please use this code to verify your email address.</p>
+            <p class="website-info">This email is sent from Dairy. Visit us at <a href="http://dairy.ryuytyuu.com"
+                style="color: #009688; text-decoration: none;">dairy.ryuytyuu.com</a>.
+            </p>
+        </div>
+        </body>
+      </html>
+    `;
   }
 }

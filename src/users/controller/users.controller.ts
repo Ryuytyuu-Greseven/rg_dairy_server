@@ -8,6 +8,8 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { BookCreationDto } from 'src/dtos/book-creation.dto';
 import { DairyDetailsDto } from 'src/dtos/dairy-details.dto';
 import { NewPageDto } from 'src/dtos/new-page.dto';
+import { VerifyDto } from 'src/dtos/verify-user.dto';
+import { ResendOtpDto } from 'src/dtos/resend-otp.dto';
 
 @Controller('users')
 export class UsersController {
@@ -26,6 +28,15 @@ export class UsersController {
   @Post('signup')
   signupRequest(@Body() userDetails: SignupDto) {
     return this.userService.signUpUser(userDetails);
+  }
+
+  @Post('verify')
+  verifyRequest(@Body() userDetails: VerifyDto) {
+    return this.userService.verifyUser(userDetails);
+  }
+  @Post('resend_otp')
+  resendVerificationRequest(@Body() userDetails: ResendOtpDto) {
+    return this.userService.regenerateOtp(userDetails);
   }
 
   // ===================  BOOKS  ===================  //
