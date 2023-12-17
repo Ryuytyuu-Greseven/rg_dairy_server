@@ -8,6 +8,9 @@ import { UsersModule } from './users/users.module';
 import { LoggerMiddleware } from './middlewares/logger/logger.middleware';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
+import { CryptoService } from './crypto.service';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { GlobalInterceptor } from './middlewares/interceptors/global.interceptor';
 
 config();
 @Module({
@@ -18,7 +21,12 @@ config();
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService, AuthService],
+  providers: [
+    AppService,
+    AuthService,
+    CryptoService,
+    { provide: APP_INTERCEPTOR, useClass: GlobalInterceptor },
+  ],
   exports: [AppService],
 })
 export class AppModule implements NestModule {

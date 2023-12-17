@@ -21,6 +21,7 @@ import { randomBytes } from 'crypto';
 import { TempUser } from 'src/schemas/temp-user.schema';
 import { VerifyDto } from 'src/dtos/verify-user.dto';
 import { ResendOtpDto } from 'src/dtos/resend-otp.dto';
+import { CryptoService } from '../../crypto.service';
 
 @Injectable()
 export class UsersService {
