@@ -264,7 +264,7 @@ export class UsersService {
             color: body.titleColor,
           },
           bookConfig: { color: body.bookColor },
-          pages: [],
+          pages: [{ pageNo: 1, config: {}, text: 'Write Something' }],
         },
       ]);
       log('Dairy Insertion', response);
