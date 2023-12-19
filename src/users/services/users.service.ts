@@ -171,23 +171,28 @@ export class UsersService {
       const tempUserDetails = await this.fetchTempUserDetails(body.userId);
 
       if (tempUserDetails.email) {
-        console.log('check', body);
+        if (body.otp === tempUserDetails.otp) {
+          console.log('check', body);
 
-        const login = new this.UserModel({
-          email: tempUserDetails.email,
-          password: tempUserDetails.password,
-          personalNumber: tempUserDetails.personalNumber,
-          profilename: tempUserDetails.profilename,
-          username: tempUserDetails.username,
-        });
+          const login = new this.UserModel({
+            email: tempUserDetails.email,
+            password: tempUserDetails.password,
+            personalNumber: tempUserDetails.personalNumber,
+            profilename: tempUserDetails.profilename,
+            username: tempUserDetails.username,
+          });
 
-        const response = await login.save();
-        console.log(response);
+          const response = await login.save();
+          console.log(response);
 
-        result.message = ERROR_MESSAGES.account_created;
+          result.message = ERROR_MESSAGES.account_created;
+        } else {
+          result.success = false;
+          result.message = ERROR_MESSAGES.otp_invalid;
+        }
       } else {
         result.success = false;
-        result.message = ERROR_MESSAGES.account_exists;
+        result.message = ERROR_MESSAGES.otp_invalid;
       }
     } catch (error) {
       console.log(error);
