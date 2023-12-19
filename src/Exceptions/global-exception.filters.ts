@@ -3,24 +3,42 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
+  HttpStatus,
 } from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
+import { captureException } from '@sentry/node';
 import { log } from 'console';
-import { Request, Response } from 'express';
+import { CryptoService } from 'src/crypto.service';
 
-@Catch(HttpException)
+@Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
-    const status = exception.getStatus();
+  constructor(
+    public readonly httpAdapterHost: HttpAdapterHost,
+    private crypto: CryptoService,
+  ) {}
 
-    log('Exception', exception);
-    response.status(200).json({
-      statusCode: status === 401 ? status : 200,
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const { httpAdapter } = this.httpAdapterHost;
+    const ctx = host.switchToHttp();
+
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    const body = {
+      statusCode: status,
       success: false,
       timestamp: new Date().toISOString(),
-      path: request.url,
-    });
+      path: httpAdapter.getRequestUrl(ctx.getRequest()),
+      message: 'Unable to process right now!',
+    };
+
+    log('Exception', exception);
+    captureException(exception);
+
+    const cryptoData = this.crypto.encrypt(ctx.getRequest(), body);
+
+    httpAdapter.reply(ctx.getResponse(), cryptoData, 200);
   }
 }

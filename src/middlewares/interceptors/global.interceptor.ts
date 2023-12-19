@@ -23,10 +23,9 @@ export class GlobalInterceptor implements NestInterceptor {
       request.body = this.crypto.decrypt(request);
     }
 
-    const now = Date.now();
     return next.handle().pipe(
       map((data: any) => {
-        console.log(`After... ${data}`, request.url);
+        console.log(`After...`, data, request.url);
         if (request.url !== '/') {
           data = this.crypto.encrypt(request, data);
         }

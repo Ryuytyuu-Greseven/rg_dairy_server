@@ -9,8 +9,9 @@ import { LoggerMiddleware } from './middlewares/logger/logger.middleware';
 import { AuthService } from './auth/auth.service';
 import { AuthModule } from './auth/auth.module';
 import { CryptoService } from './crypto.service';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { GlobalInterceptor } from './middlewares/interceptors/global.interceptor';
+import { GlobalExceptionFilter } from './Exceptions/global-exception.filters';
 
 config();
 @Module({
@@ -25,6 +26,7 @@ config();
     AppService,
     AuthService,
     CryptoService,
+    { provide: APP_FILTER, useClass: GlobalExceptionFilter },
     { provide: APP_INTERCEPTOR, useClass: GlobalInterceptor },
   ],
   exports: [AppService],

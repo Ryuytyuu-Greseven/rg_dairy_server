@@ -23,10 +23,7 @@ config();
       signOptions: { expiresIn: '600m' },
     }),
   ],
-  providers: [
-    UsersService,
-    { provide: 'APP_FILTER', useClass: GlobalExceptionFilter },
-  ],
+  providers: [UsersService],
   controllers: [UsersController],
 })
 export class UsersModule {}
