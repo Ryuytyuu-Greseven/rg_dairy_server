@@ -20,4 +20,8 @@ export const ERROR_MESSAGES = {
   temp_user_success: 'Please Verify The OTP.',
   otp_resend_success: 'Otp Resent Successfully.',
   otp_invalid: 'Otp is Invalid.',
+
+  otp_verify_success: 'Otp Verification Successfully.',
+
+  unable_to_process: 'Unable To The Process Request.',
 };

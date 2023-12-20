@@ -21,7 +21,7 @@ import { randomBytes } from 'crypto';
 import { TempUser } from 'src/schemas/temp-user.schema';
 import { VerifyDto } from 'src/dtos/verify-user.dto';
 import { ResendOtpDto } from 'src/dtos/resend-otp.dto';
-import { CryptoService } from '../../crypto.service';
+import { ForgotPassDto } from 'src/dtos/forgot-pass.dto';
 
 @Injectable()
 export class UsersService {
@@ -170,7 +170,24 @@ export class UsersService {
 
       const tempUserDetails = await this.fetchTempUserDetails(body.userId);
 
-      if (tempUserDetails.email) {
+      if (
+        tempUserDetails.email &&
+        tempUserDetails.username === 'reset_password'
+      ) {
+        if (body.otp === tempUserDetails.otp) {
+          console.log('check', body);
+          const updateResponse = await this.UserModel.updateOne(
+            { email: tempUserDetails.email },
+            { password: tempUserDetails.password },
+          );
+          console.log('Update Pass', updateResponse);
+
+          result.message = ERROR_MESSAGES.otp_verify_success;
+        } else {
+          result.success = false;
+          result.message = ERROR_MESSAGES.otp_invalid;
+        }
+      } else if (tempUserDetails.email) {
         if (body.otp === tempUserDetails.otp) {
           console.log('check', body);
 
@@ -231,6 +248,46 @@ export class UsersService {
       result.message = ERROR_MESSAGES.internal_error;
     }
 
+    return result;
+  }
+
+  // user request for password reset
+  async forgotPassword(body: ForgotPassDto) {
+    const result = { data: {}, success: true, message: '', userId: '' };
+    try {
+      console.log(body);
+      const userDetails: any = await this.fetchDetails('', body.email);
+
+      if (userDetails.email) {
+        console.log('check', body);
+        const enc_password = await this.encPass(body.password);
+
+        const otp = this.randomStringGenerator(2);
+        await this.sendMailToUser(body.email, otp);
+
+        const login = new this.TempUserModel({
+          email: body.email,
+          password: enc_password,
+          personalNumber: '',
+          profilename: 'reset_password',
+          username: 'reset_password',
+          otp: otp,
+        });
+
+        const response = await login.save();
+        console.log(response);
+        result.userId = `${response._id}`;
+
+        result.message = ERROR_MESSAGES.temp_user_success;
+      } else {
+        result.success = false;
+        result.message = ERROR_MESSAGES.unable_to_process;
+      }
+    } catch (error) {
+      console.log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.internal_error;
+    }
     return result;
   }
 

@@ -10,6 +10,7 @@ import { DairyDetailsDto } from 'src/dtos/dairy-details.dto';
 import { NewPageDto } from 'src/dtos/new-page.dto';
 import { VerifyDto } from 'src/dtos/verify-user.dto';
 import { ResendOtpDto } from 'src/dtos/resend-otp.dto';
+import { ForgotPassDto } from 'src/dtos/forgot-pass.dto';
 
 @Controller('users')
 export class UsersController {
@@ -37,6 +38,11 @@ export class UsersController {
   @Post('resend_otp')
   resendVerificationRequest(@Body() userDetails: ResendOtpDto) {
     return this.userService.regenerateOtp(userDetails);
+  }
+
+  @Post('pass_reset')
+  requestPassReset(@Body() userDetails: ForgotPassDto) {
+    return this.userService.forgotPassword(userDetails);
   }
 
   // ===================  BOOKS  ===================  //
