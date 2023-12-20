@@ -273,7 +273,7 @@ export class UsersService {
           pages: [{ pageNo: 1, config: {}, text: 'Write Something' }],
         },
       ]);
-      log('Dairy Insertion', response);
+      log('Diary Insertion', response);
       result.message = ERROR_MESSAGES.dairy_created;
     } catch (error) {
       log(error);
@@ -325,7 +325,7 @@ export class UsersService {
         _id: body.dairyId,
       });
 
-      log('Fetched dairy', response);
+      log('Fetched diary', response);
       result.data = response;
       result.message = ERROR_MESSAGES.fetch_success;
     } catch (error) {
@@ -416,10 +416,10 @@ export class UsersService {
 
       // send mail with defined transport object
       const info = await transporter.sendMail({
-        from: `"Dairy 🐿️" <${this.configService.get('EMAIL')}>`, // sender address
+        from: `"Diary 🐿️" <${this.configService.get('EMAIL')}>`, // sender address
         to: `${user_email}`, // "bar@example.com, baz@example.com" list of receivers
-        subject: 'OTP Verification from Dairy', // Subject line
-        text: `OTP Verification from Dairy`, // plain text body
+        subject: 'OTP Verification from Diary', // Subject line
+        text: `OTP Verification from Diary`, // plain text body
         html: this.getEmailOtp(otp), // html body
       });
       console.log('Message sent: %s', info.messageId);
@@ -441,7 +441,7 @@ export class UsersService {
       <html lang="en">
         <head>
           <meta charset="UTF-8">
-          <title>Dairy Email Verification OTP</title>
+          <title>Diary Email Verification OTP</title>
             <style>
               /* Reset default styles */
               body, h1, p {
@@ -503,8 +503,8 @@ export class UsersService {
             <p class="singup-label">Your OTP (One-Time Password) for email verification is:</p>
             <p class="otp-code">${otp}</p>
             <p class="singup-label">Please use this code to verify your email address.</p>
-            <p class="website-info">This email is sent from Dairy. Visit us at <a href="http://dairy.ryuytyuu.com"
-                style="color: #009688; text-decoration: none;">dairy.ryuytyuu.com</a>.
+            <p class="website-info">This email is sent from Diary. Visit us at <a href="http://diary.ryuytyuu.com"
+                style="color: #009688; text-decoration: none;">diary.ryuytyuu.com</a>.
             </p>
         </div>
         </body>

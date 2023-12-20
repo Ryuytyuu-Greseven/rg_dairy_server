@@ -10,8 +10,8 @@ export const ERROR_MESSAGES = {
   user_id_available: `Requested User ID Available.`,
   user_id_not_available: `Requested User ID Not Available.Get Other One.`,
 
-  dairy_created: 'Dairy Creation Done.',
-  dairy_creation_error: 'Ynable To Create Dairy.',
+  dairy_created: 'Diary Creation Done.',
+  dairy_creation_error: 'Ynable To Create Diary.',
   dairy_fetch_failure: `Unable To Fetch Dairies.`,
 
   page_saved: 'Page Saved Successfully.',
