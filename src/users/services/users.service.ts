@@ -321,6 +321,7 @@ export class UsersService {
           title: body.title,
           year: body.year,
           genre: '',
+          type: body.type,
           author: userDetails.username,
           titleConfig: {
             font: body.font,

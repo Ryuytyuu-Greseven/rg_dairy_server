@@ -26,6 +26,9 @@ export class Book {
 
   @Prop({ required: true, type: Array<Page> })
   pages: Page[];
+
+  @Prop({ required: true, default: 1 })
+  type: number;
 }
 
 @Schema({ timestamps: true })

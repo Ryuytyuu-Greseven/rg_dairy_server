@@ -1,6 +1,8 @@
 import {
   IsNotEmpty,
+  IsNumber,
   IsString,
+  Max,
   MaxLength,
   Min,
   MinLength,
@@ -36,4 +38,10 @@ export class BookCreationDto {
   @MinLength(7)
   @MaxLength(7)
   titleColor: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Min(1)
+  @Max(2)
+  type: number;
 }
