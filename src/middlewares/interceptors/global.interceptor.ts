@@ -25,11 +25,11 @@ export class GlobalInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((data: any) => {
-        console.log(`After...`, data, request.url);
+        // console.log(`After...`, data, request.url);
         if (request.url !== '/') {
           data = this.crypto.encrypt(request, data);
         }
-        console.log('Final Response', data);
+        // console.log('Final Response', data);
         return data;
       }),
     );

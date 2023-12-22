@@ -21,4 +21,8 @@ export class NewPageDto {
   @IsNumber()
   @IsNotEmpty()
   pageNo: number;
+
+  @IsString()
+  @IsNotEmpty()
+  pageId: string;
 }

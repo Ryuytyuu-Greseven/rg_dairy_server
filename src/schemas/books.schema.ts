@@ -5,6 +5,18 @@ import { User } from './users.schema';
 export type BookDocument = HydratedDocument<Book>;
 
 @Schema({ timestamps: true })
+export class Page {
+  @Prop({ required: true })
+  pageNo: number;
+
+  @Prop({ required: true })
+  text: string;
+
+  @Prop({ required: true, type: mongoose.Schema.Types.Mixed, default: {} })
+  config: object;
+}
+
+@Schema({ timestamps: true })
 export class Book {
   @Prop({ required: true })
   title: string;
@@ -24,23 +36,12 @@ export class Book {
   @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
   bookConfig: object;
 
-  @Prop({ required: true, type: Array<Page> })
+  @Prop({ required: true, type: [Page] })
   pages: Page[];
 
   @Prop({ required: true, default: 1 })
   type: number;
 }
 
-@Schema({ timestamps: true })
-class Page {
-  @Prop({ required: true })
-  pageNo: number;
-
-  @Prop({ required: true })
-  text: string;
-
-  @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
-  config: object;
-}
-
 export const BookSchema = SchemaFactory.createForClass(Book);
+// export const PageSchema = SchemaFactory.createForClass(Page);

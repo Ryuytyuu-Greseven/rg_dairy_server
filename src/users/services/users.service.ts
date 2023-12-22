@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import * as nodeMailer from 'nodemailer';
 import { compare, hash } from 'bcrypt';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { log } from 'console';
 
 import { User } from 'src/schemas/users.schema';
@@ -12,7 +12,7 @@ import { LoginDto } from 'src/dtos/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ERROR_MESSAGES } from 'src/constants/contants';
 import { SignupDto } from 'src/dtos/signup.dto';
-import { Book } from 'src/schemas/books.schema';
+import { Book, Page } from 'src/schemas/books.schema';
 import { BookCreationDto } from 'src/dtos/book-creation.dto';
 import { Request } from 'express';
 import { DairyDetailsDto } from 'src/dtos/dairy-details.dto';
@@ -405,10 +405,33 @@ export class UsersService {
     try {
       const userDetails = request['user'];
       const newPage = { pageNo: body.pageNo, text: body.text, config: {} };
-      const page = await this.BookModel.updateOne(
-        { _id: body.bookId, author: userDetails.username },
-        { $push: { pages: newPage } },
-      );
+      const bookDetails = await this.BookModel.findById({ _id: body.bookId });
+      // bookDetails.pages[body.pageNo] = newPage;
+
+      // const pageModel = mongoose.model('Page', PageSchema);
+      // const new_page = new pageModel({
+      //   pageNo: body.pageNo,
+      //   text: body.text,
+      //   config: {},
+      // });
+
+      if (body.pageId) {
+        bookDetails.pages[body.pageNo - 1].text = body.text;
+      } else {
+        bookDetails.pages.push({
+          pageNo: body.pageNo,
+          text: body.text,
+          config: {},
+        });
+      }
+
+      // bookDetails.title = bookDetails.title;
+
+      const page = await bookDetails.save();
+      // const page = await this.BookModel.updateOne(
+      //   { _id: body.bookId, author: userDetails.username },
+      //   { $push: { pages: newPage } },
+      // );
       console.log('Added a new page', page);
 
       result.data = JSON.parse(JSON.stringify(page));
@@ -440,7 +463,7 @@ export class UsersService {
         { pages: 1 },
       );
       result.data = pages;
-      result.message = ERROR_MESSAGES.page_saved;
+      result.message = ERROR_MESSAGES.fetch_success;
     } catch (error) {
       console.log(error);
       result.success = false;
