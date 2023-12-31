@@ -294,9 +294,12 @@ export class UsersService {
   // fetching user details from database
   getUserDetails = async (userName: string) => {
     log('Fetching User Details:', userName);
-    const userDetails = await this.UserModel.findOne({ username: userName });
+    const userDetails = await this.UserModel.findOne(
+      { username: userName },
+      { username: 1, email: 1, profilename: 1 },
+    );
     log('User Details:', userDetails);
-    return { details: userDetails };
+    return { data: userDetails, success: true };
   };
 
   async encPass(password: string) {

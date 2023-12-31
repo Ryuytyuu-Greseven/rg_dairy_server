@@ -16,8 +16,10 @@ import { ForgotPassDto } from 'src/dtos/forgot-pass.dto';
 export class UsersController {
   constructor(private userService: UsersService) {}
 
+  @UseGuards(AuthGuard)
   @Post('details')
-  fetchUserDetails(@Body() userDetails: UserNameDto) {
+  fetchUserDetails(@Req() request: Request) {
+    const userDetails = request['user'];
     return this.userService.getUserDetails(userDetails.username);
   }
 
