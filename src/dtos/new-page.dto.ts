@@ -1,6 +1,7 @@
 import {
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   MaxLength,
   Min,
@@ -23,6 +24,6 @@ export class NewPageDto {
   pageNo: number;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   pageId: string;
 }

@@ -12,7 +12,7 @@ export class BookCreationDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(1)
-  @MaxLength(20)
+  @MaxLength(50)
   title: string;
 
   @IsString()
