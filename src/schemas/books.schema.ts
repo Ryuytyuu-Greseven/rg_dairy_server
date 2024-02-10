@@ -41,6 +41,9 @@ export class Book {
 
   @Prop({ required: true, default: 1 })
   type: number;
+
+  @Prop({ required: true, default: 2 })
+  accessLevel: number;
 }
 
 export const BookSchema = SchemaFactory.createForClass(Book);

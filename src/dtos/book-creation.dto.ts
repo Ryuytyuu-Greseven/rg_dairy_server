@@ -44,4 +44,9 @@ export class BookCreationDto {
   @Min(1)
   @Max(2)
   type: number;
+
+  @IsNumber()
+  @Min(1)
+  @Max(2)
+  accessLevel: number;
 }

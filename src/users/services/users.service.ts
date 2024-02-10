@@ -325,6 +325,7 @@ export class UsersService {
           year: body.year,
           genre: '',
           type: body.type,
+          accessLevel: body.accessLevel ? body.accessLevel : 2,
           author: userDetails.username,
           titleConfig: {
             font: body.font,
