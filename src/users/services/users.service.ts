@@ -345,6 +345,7 @@ export class UsersService {
     return result;
   }
 
+  // fetch personal diaries
   async getBooks(body: any, request: Request) {
     const result = {
       success: true,
@@ -371,6 +372,45 @@ export class UsersService {
     return result;
   }
 
+  // fetch personal diaries
+  async getPublicBooks(body: any, request: Request) {
+    const result = {
+      success: true,
+      message: '',
+      data: {},
+    };
+
+    try {
+      const userDetails = request['user'];
+      console.log(userDetails, result);
+
+      // const response = await this.BookModel.find({
+      //   accessLevel: 1,
+      // });
+
+      const response = await this.BookModel.aggregate()
+        .match({ accessLevel: 1 })
+        .lookup({
+          foreignField: 'username',
+          localField: 'author',
+          from: 'users',
+          as: 'authorDetails',
+          pipeline: [{ $project: { profilename: 1, _id: -1 } }],
+        })
+        .unwind({ path: '$authorDetails', preserveNullAndEmptyArrays: true });
+
+      log('My Dairies', response);
+      result.data = response;
+      result.message = ERROR_MESSAGES.fetch_success;
+    } catch (error) {
+      log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.dairy_fetch_failure;
+    }
+    return result;
+  }
+
+  // fetching the personal diary detaials
   async getDairyDetails(body: DairyDetailsDto, request: Request) {
     const result = {
       success: true,
@@ -384,6 +424,34 @@ export class UsersService {
 
       const response = await this.BookModel.findOne({
         author: userDetails.username,
+        _id: body.dairyId,
+      });
+
+      log('Fetched diary', response);
+      result.data = response;
+      result.message = ERROR_MESSAGES.fetch_success;
+    } catch (error) {
+      log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.dairy_fetch_failure;
+    }
+    return result;
+  }
+
+  // fetching the publix diary details
+  async getPublicDairyDetails(body: DairyDetailsDto, request: Request) {
+    const result = {
+      success: true,
+      message: '',
+      data: {},
+    };
+
+    try {
+      const userDetails = request['user'];
+      console.log(userDetails, result);
+
+      const response = await this.BookModel.findOne({
+        accessLevel: 1,
         _id: body.dairyId,
       });
 
@@ -463,6 +531,34 @@ export class UsersService {
         {
           _id: body.dairyId,
           author: userDetails.username,
+        },
+        { pages: 1 },
+      );
+      result.data = pages;
+      result.message = ERROR_MESSAGES.fetch_success;
+    } catch (error) {
+      console.log(error);
+      result.success = false;
+      result.message = ERROR_MESSAGES.page_save_failure;
+    }
+    return result;
+  }
+
+  // fetching the pages from public dairy
+  async getPublicPages(body: DairyDetailsDto, request: Request) {
+    const result = {
+      success: true,
+      data: {},
+      message: '',
+    };
+
+    try {
+      const userDetails = request['user'];
+
+      const { pages } = await this.BookModel.findOne(
+        {
+          _id: body.dairyId,
+          accessLevel: 1,
         },
         { pages: 1 },
       );

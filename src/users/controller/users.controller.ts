@@ -11,6 +11,7 @@ import { NewPageDto } from 'src/dtos/new-page.dto';
 import { VerifyDto } from 'src/dtos/verify-user.dto';
 import { ResendOtpDto } from 'src/dtos/resend-otp.dto';
 import { ForgotPassDto } from 'src/dtos/forgot-pass.dto';
+import { Public } from 'src/auth/jwt.strategy';
 
 @Controller('users')
 export class UsersController {
@@ -60,10 +61,22 @@ export class UsersController {
     return this.userService.getBooks(body, request);
   }
 
+  @Public()
+  @Post('public-dairies')
+  fetchPublicBooks(@Body() body: any, @Req() request: Request) {
+    return this.userService.getPublicBooks(body, request);
+  }
+
   @UseGuards(AuthGuard)
   @Post('dairy-details')
   dairyDetails(@Body() body: DairyDetailsDto, @Req() request: Request) {
     return this.userService.getDairyDetails(body, request);
+  }
+
+  @Public()
+  @Post('public-dairy-details')
+  publicDairyDetails(@Body() body: any, @Req() request: Request) {
+    return this.userService.getPublicDairyDetails(body, request);
   }
 
   @UseGuards(AuthGuard)
@@ -76,5 +89,9 @@ export class UsersController {
   @Post('pages')
   fetchPages(@Body() body: DairyDetailsDto, @Req() request: Request) {
     return this.userService.getPages(body, request);
+  }
+  @Post('public-pages')
+  fetchPublicPages(@Body() body: DairyDetailsDto, @Req() request: Request) {
+    return this.userService.getPublicPages(body, request);
   }
 }
